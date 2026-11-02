@@ -9,11 +9,27 @@ export interface AiClient {
   generate(args: { system: string; content: string; signal: AbortSignal }): Promise<string>;
 }
 
+/**
+ * Environment dashboards make it easy to paste a model name with stray quotes, spaces or the
+ * "models/" prefix that the Gemini docs and API listings show. All of those are the same model.
+ */
+export function normalizeModel(raw?: string): string | undefined {
+  const m = raw
+    ?.trim()
+    .replace(/^["']+|["']+$/g, "")
+    .trim()
+    .replace(/^models\//i, "");
+  return m ? m : undefined;
+}
+
 export function createGeminiClient(env: Record<string, string | undefined> = process.env): AiClient {
   const apiKey = env.GEMINI_API_KEY?.trim();
-  const model = env.GEMINI_MODEL?.trim();
+  const model = normalizeModel(env.GEMINI_MODEL);
   if (!apiKey) throw new AppError("API_KEY_MISSING");
-  if (!model) throw new AppError("MODEL_UNAVAILABLE");
+  if (!model) {
+    console.error("[decoded] GEMINI_MODEL is not set (or is empty) in this server's environment");
+    throw new AppError("MODEL_NOT_SET");
+  }
   const ai = new GoogleGenAI({ apiKey });
 
   return {
@@ -31,6 +47,9 @@ export function createGeminiClient(env: Record<string, string | undefined> = pro
         });
         return res.text ?? "";
       } catch (err) {
+        const status = err instanceof ApiError ? err.status : (err as { status?: number })?.status;
+        // A model name is configuration, not a secret: log it so a typo is obvious in the server logs.
+        if (status === 404) console.error(`[decoded] Gemini does not know a model called "${model}" (check GEMINI_MODEL)`);
         throw mapProviderError(err, signal);
       }
     },

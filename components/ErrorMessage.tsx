@@ -7,7 +7,7 @@ interface Props {
   onSample?: () => void;
 }
 
-const SAMPLE_HINT = new Set(["API_KEY_MISSING", "API_KEY_INVALID", "AI_BUSY", "MODEL_UNAVAILABLE", "AI_UNAVAILABLE", "RATE_LIMITED", "AI_TIMEOUT"]);
+const SAMPLE_HINT = new Set(["API_KEY_MISSING", "API_KEY_INVALID", "AI_BUSY", "MODEL_NOT_SET", "MODEL_UNAVAILABLE", "AI_UNAVAILABLE", "RATE_LIMITED", "AI_TIMEOUT"]);
 
 export function ErrorMessage({ error, onRetry, onSample }: Props) {
   return (
