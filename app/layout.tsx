@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { LenisProvider } from "@/components/LenisProvider";
+import { HoverFX } from "@/components/site/HoverFX";
 import "./globals.css";
 
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <LenisProvider>{children}</LenisProvider>
         <div className="grain" aria-hidden="true" />
+        <HoverFX />
       </body>
     </html>
   );

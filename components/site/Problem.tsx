@@ -27,7 +27,7 @@ function Cost({ c, i, p }: { c: (typeof COSTS)[number]; i: number; p: MotionValu
   const opacity = useTransform(p, [start, start + 0.08], [0, 1]);
   const y = useTransform(p, [start, start + 0.08], [40, 0]);
   return (
-    <motion.li style={{ opacity, y }} className="border-t border-white/10 pt-4">
+    <motion.li style={{ opacity, y }} className="border-t border-white/10 pt-4 transition-colors duration-300 hover:border-white/50">
       <p className="title text-blend">{c.word}</p>
       <p className="mt-2 max-w-xs text-white/60">{c.line}</p>
     </motion.li>
@@ -49,7 +49,7 @@ export function Problem() {
         <h2 className="title max-w-4xl">{SENTENCE}</h2>
         <ul className="mt-14 grid gap-8 md:grid-cols-3">
           {COSTS.map((c) => (
-            <li key={c.word} className="border-t border-white/10 pt-4">
+            <li key={c.word} className="border-t border-white/10 pt-4 transition-colors duration-300 hover:border-white/50">
               <p className="title text-blend">{c.word}</p>
               <p className="mt-2 text-white/60">{c.line}</p>
             </li>

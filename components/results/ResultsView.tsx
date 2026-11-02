@@ -198,7 +198,7 @@ function buildChapters(result: AnalysisResponse, onReset: () => void): Chapter[]
           {tiles.length > 0 && (
             <ul className="mb-6 grid gap-3 sm:grid-cols-3">
               {tiles.map((t) => (
-                <li key={t.label} className={`rounded-2xl p-4 ${t.red ? "ring-blend bg-white/[0.04]" : "bg-white/[0.04]"}`}>
+                <li key={t.label} className={`lift rounded-2xl p-4 ${t.red ? "ring-blend bg-white/[0.04]" : "bg-white/[0.04]"}`}>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-white/50">{t.label}</p>
                   <p className={`mt-1 break-words font-heading text-3xl italic ${t.red ? "text-blend" : ""}`}>{t.node}</p>
                 </li>
@@ -333,7 +333,7 @@ function buildChapters(result: AnalysisResponse, onReset: () => void): Chapter[]
             {a.labResults.map((r, i) => {
               const status = derived?.labRanges?.[i];
               return (
-                <li key={r.test + i} className="py-3">
+                <li key={r.test + i} className="-mx-3 rounded-xl px-3 py-3 transition-colors duration-300 hover:bg-white/[0.04]">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                     <span className="text-lg">{r.test}</span>
                     <span className="font-mono">
@@ -633,11 +633,11 @@ export function ResultsView({ result, onReset }: { result: AnalysisResponse; onR
                   type="button"
                   onClick={() => jump(i)}
                   aria-current={i === active ? "step" : undefined}
-                  className={`flex items-center gap-3 text-left text-sm transition-colors ${i === active ? "text-white" : "text-white/35 hover:text-white/70"}`}
+                  className={`group flex items-center gap-3 text-left text-sm transition-all duration-300 ${i === active ? "text-white" : "text-white/35 hover:translate-x-1 hover:text-white/80"}`}
                 >
                   <span
                     aria-hidden="true"
-                    className={`h-px transition-all duration-500 ${i === active ? "w-8" : "w-3 bg-white/30"}`}
+                    className={`h-px transition-all duration-500 ${i === active ? "w-8" : "w-3 bg-white/30 group-hover:w-6 group-hover:bg-white/70"}`}
                     style={i === active ? { background: "var(--blend)" } : undefined}
                   />
                   {c.label}

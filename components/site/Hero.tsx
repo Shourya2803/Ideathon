@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import ShinyText from "@/components/reactbits/ShinyText";
 import { useSceneSection } from "@/components/scene/store";
+import { Magnetic } from "./Magnetic";
 import { MaskWords } from "./motion";
 
 export function Hero() {
@@ -49,18 +50,22 @@ export function Hero() {
           transition={{ delay: 1.3, duration: 0.9 }}
           className="mt-10 flex flex-wrap items-center gap-3"
         >
-          <a
-            href="#decode"
-            className="liquid-glass-strong flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-medium text-white transition-all hover:bg-white/10"
-          >
-            Decode a document <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
-          </a>
-          <a
-            href="#documents"
-            className="flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90"
-          >
-            See what it reads <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </a>
+          <Magnetic>
+            <a
+              href="#decode"
+              className="liquid-glass-strong flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-medium text-white transition-all hover:bg-white/10"
+            >
+              Decode a document <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a
+              href="#documents"
+              className="flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90"
+            >
+              See what it reads <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </Magnetic>
         </motion.div>
       </motion.div>
 

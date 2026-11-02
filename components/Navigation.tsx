@@ -3,6 +3,7 @@
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { Magnetic } from "@/components/site/Magnetic";
 
 const LINKS = [
   { href: "#problem", label: "Why" },
@@ -30,27 +31,31 @@ export function Navigation() {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         className="liquid-glass flex h-14 w-full max-w-3xl items-center justify-between rounded-full pl-5 pr-2"
       >
-        <a href="#top" className="flex items-center gap-2">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--blend)" }} />
+        <a href="#top" className="group flex items-center gap-2">
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full transition-transform duration-300 group-hover:scale-[1.8]" style={{ background: "var(--blend)" }} />
           <span className="font-heading text-2xl italic leading-none">Decoded</span>
         </a>
 
         <ul className="hidden items-center gap-7 text-sm text-white/65 md:flex">
           {LINKS.map((l) => (
             <li key={l.href}>
-              <a href={l.href} className="transition-colors hover:text-white">
+              <a href={l.href} className="link-sweep py-1 transition-colors hover:text-white">
                 {l.label}
               </a>
             </li>
           ))}
         </ul>
 
-        <a
-          href="#decode"
-          className="hidden items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90 md:flex"
-        >
-          Decode a document <ArrowUpRight size={15} aria-hidden="true" />
-        </a>
+        <span className="hidden md:block">
+          <Magnetic strength={0.2}>
+            <a
+              href="#decode"
+              className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90"
+            >
+              Decode a document <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          </Magnetic>
+        </span>
 
         <button
           type="button"

@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useSceneSection } from "@/components/scene/store";
+import { Magnetic } from "./Magnetic";
 import { MaskWords } from "./motion";
 
 const SRC = "https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8";
@@ -69,15 +70,19 @@ export function CtaFooter() {
           nothing stored.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-          <a
-            href="#decode"
-            className="liquid-glass-strong flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition-all hover:bg-white/10"
-          >
-            Decode a document <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
-          </a>
-          <a href="#documents" className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-colors hover:bg-white/90">
-            What it reads <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </a>
+          <Magnetic>
+            <a
+              href="#decode"
+              className="liquid-glass-strong flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition-all hover:bg-white/10"
+            >
+              Decode a document <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a href="#documents" className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-colors hover:bg-white/90">
+              What it reads <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </Magnetic>
         </div>
 
         <footer className="mt-40 flex flex-col items-center justify-between gap-4 border-t border-white/10 py-8 md:flex-row">
@@ -88,7 +93,7 @@ export function CtaFooter() {
               ["How it works", "#how"],
               ["Back to top", "#top"],
             ].map(([label, href]) => (
-              <a key={label} href={href} className="text-xs font-light text-white/40 transition-colors hover:text-white/70">
+              <a key={label} href={href} className="link-sweep py-1 text-xs font-light text-white/40 transition-colors hover:text-white/80">
                 {label}
               </a>
             ))}

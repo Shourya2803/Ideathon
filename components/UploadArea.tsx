@@ -6,6 +6,7 @@ import { useId, useRef, useState } from "react";
 import { LIMIT_LABELS } from "@/lib/config";
 import { AppError, toErrorPayload, type ErrorPayload } from "@/lib/errors";
 import { validateFileMeta } from "@/lib/pdf/validate";
+import { Magnetic } from "@/components/site/Magnetic";
 import { ErrorMessage } from "@/components/ErrorMessage";
 
 export type SampleKind = "bill" | "lab";
@@ -58,7 +59,7 @@ export function UploadArea({ file, disabled, onFile, onAnalyze, onSampleResult, 
           setDragging(false);
           if (!disabled) accept(e.dataTransfer.files[0]);
         }}
-        className={`liquid-glass-strong rounded-[2rem] bg-obsidian/70 px-6 py-10 text-center transition-transform duration-500 sm:px-12 sm:py-14 ${
+        className={`liquid-glass-strong rounded-[2rem] bg-obsidian/70 transition-shadow duration-500 hover:shadow-[0_0_70px_-24px_rgba(124,63,230,0.7)] px-6 py-10 text-center transition-transform duration-500 sm:px-12 sm:py-14 ${
           dragging ? "scale-[1.02] ring-blend" : ""
         }`}
       >
@@ -113,14 +114,16 @@ export function UploadArea({ file, disabled, onFile, onAnalyze, onSampleResult, 
             />
             {file ? "Replace file" : "Browse files"}
           </label>
-          <button
-            type="button"
-            onClick={onAnalyze}
-            disabled={!file || disabled}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-medium text-black transition-all enabled:hover:bg-white/90 disabled:opacity-30"
-          >
-            Decode this document <ArrowUpRight size={16} aria-hidden="true" />
-          </button>
+          <Magnetic>
+            <button
+              type="button"
+              onClick={onAnalyze}
+              disabled={!file || disabled}
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-medium text-black transition-all enabled:hover:bg-white/90 disabled:opacity-30"
+            >
+              Decode this document <ArrowUpRight size={16} aria-hidden="true" />
+            </button>
+          </Magnetic>
         </div>
 
         <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-white/40">

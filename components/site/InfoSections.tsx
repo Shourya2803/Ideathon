@@ -42,9 +42,9 @@ export function HowItWorks() {
                 whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 viewport={{ once: true, margin: "-8% 0px" }}
                 transition={{ duration: 0.9, ease: EASE, delay: i * 0.12 }}
-                className="grid grid-cols-[3.5rem_1fr] gap-4 border-t border-white/10 pt-6"
+                className="step grid grid-cols-[3.5rem_1fr] gap-4 border-t border-white/10 pt-6"
               >
-                <span className="font-mono text-sm text-white/40">{s.n}</span>
+                <span className="step-n font-mono text-sm text-white/40">{s.n}</span>
                 <div>
                   <h3 className="font-heading text-3xl italic">{s.title}</h3>
                   <p className="mt-2 text-white/60">{s.body}</p>
@@ -70,7 +70,7 @@ export function Privacy() {
             <MaskWords text="Your PDF never" onView /> <MaskWords text="reaches the AI." wordClassName="text-blend" delay={0.2} onView />
           </h2>
           <Reveal delay={0.2}>
-            <ul className="mt-10 space-y-4 text-white/65">
+            <ul className="mt-10 space-y-4 text-white/65 [&>li]:transition-all [&>li]:duration-300 [&>li]:hover:translate-x-1.5 [&>li]:hover:text-white">
               <li>Text is extracted on our server. Only cleaned text is analyzed, never the original file.</li>
               <li>Names, emails, phone numbers, addresses, account and ID numbers become placeholders.</li>
               <li>If cleaning fails, analysis stops. There is no unsanitized fallback.</li>

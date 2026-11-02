@@ -94,9 +94,9 @@ export function DocumentTypes() {
                       initial={reduce ? false : { opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.15 + i * 0.07, duration: 0.5 }}
-                      className="flex items-center gap-3"
+                      className="group/li flex items-center gap-3 transition-colors duration-300 hover:text-white"
                     >
-                      <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "var(--blend)" }} />
+                      <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full transition-transform duration-300 group-hover/li:scale-[2.2]" style={{ background: "var(--blend)" }} />
                       {r}
                     </motion.li>
                   ))}
@@ -113,10 +113,13 @@ export function DocumentTypes() {
                   onClick={() => jump(i)}
                   aria-label={d.name}
                   aria-current={i === index ? "step" : undefined}
-                  className="group grid h-8 place-items-center"
+                  className="group relative grid h-8 place-items-center"
                 >
+                  <span className="pointer-events-none absolute -top-7 left-0 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-black opacity-0 shadow-lg transition-all duration-300 group-hover:-translate-y-1 group-hover:opacity-100 group-focus-visible:opacity-100">
+                    {d.name}
+                  </span>
                   <span
-                    className={`block h-[3px] rounded-full transition-all duration-500 ${i === index ? "w-10" : "w-5 bg-white/20 group-hover:bg-white/50"}`}
+                    className={`block h-[3px] rounded-full transition-all duration-500 ${i === index ? "w-10" : "w-5 bg-white/20 group-hover:w-8 group-hover:bg-white/60"}`}
                     style={i === index ? { background: "var(--blend)" } : undefined}
                   />
                 </button>

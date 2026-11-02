@@ -157,6 +157,128 @@ h3 {
   }
 }
 
+/* ------------------------------------------------------------------ hover effects
+   Everything below is mouse-only: it lives inside (hover: hover) so touch devices never see it. */
+@media (hover: hover) and (pointer: fine) {
+  /* Spotlight that follows the cursor inside every glass surface (--mx/--my are set by HoverFX). */
+  .liquid-glass::after,
+  .liquid-glass-strong::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(155, 107, 255, 0.17),
+      rgba(37, 99, 235, 0.09) 38%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .liquid-glass:hover::after,
+  .liquid-glass-strong:hover::after {
+    opacity: 1;
+  }
+
+  /* Solid white pill buttons (bg-white + text-black): a blue-to-red shine sweeps across. */
+  .bg-white.text-black {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .bg-white.text-black::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 32%, rgba(111, 155, 255, 0.55) 46%, rgba(255, 77, 106, 0.4) 56%, transparent 70%);
+    transform: translateX(-130%);
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bg-white.text-black:hover::after {
+    transform: translateX(130%);
+  }
+
+  /* Arrow icons nudge in the direction they point. */
+  .lucide-arrow-up-right {
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :is(a, button):hover > .lucide-arrow-up-right {
+    transform: translate(3px, -3px);
+  }
+
+  /* Gradient underline that draws in under nav / footer links. */
+  .link-sweep {
+    background-image: var(--blend);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+  }
+  .link-sweep:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Lift + glow for static (non-animated) cards. */
+  .lift {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, background-color 0.3s;
+  }
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -22px rgba(124, 63, 230, 0.75);
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  /* "How it works" steps slide over and light up. */
+  /* Uses the independent `translate` property: Motion owns `transform` on these elements. */
+  .step {
+    transition: translate 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s;
+  }
+  .step:hover {
+    translate: 8px 0;
+    border-color: rgba(155, 107, 255, 0.75);
+  }
+  .step:hover .step-n {
+    color: #fff;
+  }
+}
+.step-n {
+  transition: color 0.3s;
+}
+
+/* Cursor halo (HoverFX). Inverts what's under it, and swells into a lens over clickable things. */
+.cursor-halo {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s cubic-bezier(0.22, 1, 0.36, 1), margin 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s, border-color 0.3s, opacity 0.3s;
+}
+.cursor-halo[data-state="link"] {
+  width: 62px;
+  height: 62px;
+  margin: -31px 0 0 -31px;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: transparent;
+}
+.cursor-halo[data-press] {
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+}
+
 /* Film grain over everything; decorative only. */
 .grain {
   pointer-events: none;

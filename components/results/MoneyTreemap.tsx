@@ -55,7 +55,7 @@ export function MoneyTreemap({ items, currency, format }: { items: Item[]; curre
             >
               <span
                 className={`flex h-full w-full flex-col justify-between overflow-hidden rounded-xl p-2.5 transition-all duration-300 sm:p-3 ${
-                  on ? "ring-2 ring-white" : selected ? "opacity-45" : "hover:brightness-125"
+                  on ? "ring-2 ring-white" : selected ? "opacity-45 hover:opacity-80" : "hover:z-10 hover:scale-[1.035] hover:brightness-125 hover:shadow-[0_0_30px_rgba(155,107,255,0.55)]"
                 }`}
                 style={{
                   background: `linear-gradient(140deg, ${TILE[Math.min(i, TILE.length - 1)]}, ${TILE[Math.min(i + 1, TILE.length - 1)]}cc)`,
