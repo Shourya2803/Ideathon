@@ -1,26 +1,233 @@
 @import "tailwindcss";
 
+/* Obsidian black, electric blue and neon red, blended through violet. Everything else is neutral. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --obsidian: #050505;
+  --electric: #2563eb;
+  --violet: #7c3fe6;
+  --neon: #ff304f;
+  --ink: #f5f5f7;
+  --mute: #a1a1aa;
+  --line: rgb(255 255 255 / 0.1);
+  --electric-soft: #7ea3ff;
+  --blend: linear-gradient(100deg, #6f9bff 0%, #9b6bff 45%, #ff4d6a 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-obsidian: var(--obsidian);
+  --color-electric: var(--electric);
+  --color-electric-soft: var(--electric-soft);
+  --color-violet: var(--violet);
+  --color-neon: var(--neon);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --font-heading: var(--font-serif), "Instrument Serif", serif;
+  --font-body: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  --font-sans: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  background: var(--obsidian);
+  color-scheme: dark;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* No body background: it would paint over the fixed particle canvas (z-index -10). html carries the black. */
+body {
+  color: var(--ink);
+  font-family: var(--font-barlow), "Barlow", system-ui, sans-serif;
+  font-weight: 300;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif), "Instrument Serif", serif;
+  font-weight: 400;
+}
+
+::selection {
+  background: var(--violet);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--electric-soft);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-serif), "Instrument Serif", serif;
+    font-style: italic;
+    font-size: clamp(3.2rem, 9.5vw + 0.5rem, 9.5rem);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+  }
+  .title {
+    font-family: var(--font-serif), "Instrument Serif", serif;
+    font-style: italic;
+    font-size: clamp(2.4rem, 5.5vw + 0.5rem, 5.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+  }
+  .eyebrow {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.55);
+  }
+  .text-blend {
+    background: var(--blend);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* keep italic overhang inside the clipped box */
+    padding-right: 0.08em;
+    margin-right: -0.08em;
+  }
+  .ring-blend {
+    position: relative;
+  }
+  .ring-blend::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--blend);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .liquid-glass,
+  .liquid-glass-strong {
+    background: rgba(255, 255, 255, 0.01);
+    background-blend-mode: luminosity;
+    border: none;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.025);
+  }
+  .liquid-glass-strong {
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  .liquid-glass::before,
+  .liquid-glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.2) 80%,
+      rgba(255, 255, 255, 0.5) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Film grain over everything; decorative only. */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Slim, quiet scrollbar for long result cards. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.18);
+  border-radius: 999px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Particles falling from the pages into the decoder (DocumentVortex). */
+.vortex-dot {
+  opacity: 0;
+  animation: vortex-fall 2.4s linear infinite;
+}
+@keyframes vortex-fall {
+  0% {
+    transform: translate(var(--x0), 0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x1), 170px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes drip {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  50.1% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

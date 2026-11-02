@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
   reactCompiler: true,
+  // pdfjs-dist must be loaded natively by Node (it resolves its worker dynamically).
+  serverExternalPackages: ["pdfjs-dist"],
   turbopack: {
     rules: {
       "*.css": {

@@ -1,0 +1,60 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 930 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 790 Td
+(SAMPLE DOCUMENT - FICTIONAL DATA) Tj T*
+(Brightgrid Power Distribution Ltd - Electricity Bill) Tj T*
+() Tj T*
+(Customer Name: Rahul Sharma) Tj T*
+(Consumer Number: 1234567890) Tj T*
+(Email: rahul.sharma@example.com) Tj T*
+(Phone: +91 98765 43210) Tj T*
+(Service Address: 14 Lake View Road, Pune, Maharashtra 411001) Tj T*
+() Tj T*
+(Billing Period: 1 October 2026 - 31 October 2026) Tj T*
+(Bill Date: 3 November 2026) Tj T*
+(Due Date: 18 November 2026) Tj T*
+(Units Consumed: 320 kWh) Tj T*
+() Tj T*
+(Energy Charges: Rs 1,760.00) Tj T*
+(Fixed Charges: Rs 250.00) Tj T*
+(Fuel Adjustment Charge: Rs 190.00) Tj T*
+(Electricity Duty: Rs 150.00) Tj T*
+(Late Payment Surcharge (if paid after due date): 2% per month) Tj T*
+() Tj T*
+(Total Payable: Rs 2,450.00) Tj T*
+(Previous Bill Amount: Rs 2,180.00) Tj T*
+() Tj T*
+(Pay online or at any authorised center before the due date to avoid surcharge.) Tj T*
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1292
+%%EOF
