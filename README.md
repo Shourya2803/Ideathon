@@ -61,9 +61,10 @@ npm run dev                       # http://localhost:3000
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `GEMINI_API_KEY` | yes | Server-side only. Never prefixed with `NEXT_PUBLIC_`, never sent to the browser. |
-| `GEMINI_MODEL` | yes | A model id your key can use (for example `gemini-2.5-flash`; check the [models list](https://ai.google.dev/gemini-api/docs/models)). Deliberately **not** hardcoded. |
 
-Without them the site still loads: uploading returns a clear "AI not configured" message and the labelled simulated samples are available.
+That is the only environment variable. **The Gemini model is set in code**, as `AI_MODEL` in `lib/config.ts` (currently `gemini-2.5-flash`), so a missing or mistyped environment value can never break it. To switch models, change that one line to any id from the [models list](https://ai.google.dev/gemini-api/docs/models) that your key can call.
+
+Without the key the site still loads: uploading returns a clear "AI not configured" message and the labelled simulated samples are available.
 
 ### Commands
 
@@ -606,14 +607,14 @@ flowchart TD
     D -- "yes" --> DX["Build fails<br/>(@types/node is pinned to ^22 for vitest's peer range)"]
     D -- "no" --> E["next build"]
     E --> F["Static pages + the /api/analyze function"]
-    F --> G{"Env vars set?<br/>GEMINI_API_KEY, GEMINI_MODEL"}
+    F --> G{"Env var set?<br/>GEMINI_API_KEY"}
     G -- "no" --> GX["Site loads, uploads return<br/>'AI not configured'"]
     G -- "yes" --> H(["Live: full analysis works"])
 ```
 
 Checklist:
 
-1. Set `GEMINI_API_KEY` and `GEMINI_MODEL` under **Project → Settings → Environment Variables** (Production). `.env` files are git-ignored, so Vercel can't see your local ones.
+1. Set `GEMINI_API_KEY` (the only variable; the model is set in code) under **Project → Settings → Environment Variables** (Production). `.env` files are git-ignored, so Vercel can't see your local ones.
 2. The analyze route needs the **Node.js runtime** (not Edge) because of pdf.js. `pdfjs-dist` is listed in `serverExternalPackages` in `next.config.ts`.
 3. The route requests up to 60 seconds (`maxDuration`). The free Hobby plan caps functions at that, and the Gemini call times out at 45 seconds, so it fits, but a slow model response can still fail.
 4. The in-memory rate limiter is per instance. On serverless it only slows casual abuse; use a shared store (for example Redis/Upstash) or platform rate limiting for anything public.

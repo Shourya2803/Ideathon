@@ -12,7 +12,6 @@ export type ErrorCode =
   | "SCANNED_PDF"
   | "SANITIZATION_FAILED"
   | "API_KEY_MISSING"
-  | "MODEL_NOT_SET"
   | "MODEL_UNAVAILABLE"
   | "API_KEY_INVALID"
   | "AI_BUSY"
@@ -43,8 +42,7 @@ export const ERROR_INFO: Record<ErrorCode, ErrorInfo> = {
   SCANNED_PDF: { status: 422, message: "This looks like a scanned PDF (images of text). Scanned documents aren't supported yet. Try a PDF with selectable text.", retryable: false },
   SANITIZATION_FAILED: { status: 500, message: "This document could not be safely processed, so nothing was sent to the AI. You can try again or use the sample document.", retryable: true },
   API_KEY_MISSING: { status: 503, message: "AI analysis isn't configured on this server (missing API key). You can explore the sample document instead.", retryable: false },
-  MODEL_NOT_SET: { status: 503, message: "No AI model is configured on the server. Add GEMINI_MODEL to the server's environment variables and redeploy.", retryable: false },
-  MODEL_UNAVAILABLE: { status: 503, message: "Gemini doesn't recognise the configured model name. Check the spelling of GEMINI_MODEL on the server (for example gemini-2.5-flash).", retryable: false },
+  MODEL_UNAVAILABLE: { status: 503, message: "Gemini says the AI model this app uses isn't available to your API key. The model is set by AI_MODEL in lib/config.ts.", retryable: false },
   API_KEY_INVALID: { status: 503, message: "The server's Gemini API key was rejected. Check GEMINI_API_KEY in the server's .env file.", retryable: false },
   AI_BUSY: { status: 503, message: "The AI model is overloaded right now. Please try again in a minute.", retryable: true },
   RATE_LIMITED: { status: 429, message: "Too many requests right now. Please wait a moment and try again.", retryable: true },

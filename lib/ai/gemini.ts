@@ -1,5 +1,5 @@
 import { ApiError, GoogleGenAI } from "@google/genai";
-import { LIMITS } from "../config";
+import { AI_MODEL, LIMITS } from "../config";
 import { AppError } from "../errors";
 import { analysisSchema, type Analysis } from "@/types/analysis";
 import { SYSTEM_INSTRUCTION, buildUserContent } from "./prompt";
@@ -9,32 +9,10 @@ export interface AiClient {
   generate(args: { system: string; content: string; signal: AbortSignal }): Promise<string>;
 }
 
-/**
- * Environment dashboards make it easy to paste a model name with stray quotes, spaces or the
- * "models/" prefix that the Gemini docs and API listings show. All of those are the same model.
- */
-export function normalizeModel(raw?: string): string | undefined {
-  const m = raw
-    ?.trim()
-    .replace(/^["']+|["']+$/g, "")
-    .trim()
-    .replace(/^GEMINI_MODEL\s*[=:]\s*/i, "") // a whole "GEMINI_MODEL=..." line pasted into the value box
-    .replace(/^["']+|["']+$/g, "")
-    .trim()
-    .replace(/^models\//i, "")
-    .replace(/\s+/g, "-") // "gemini 2.5 flash"
-    .toLowerCase(); // model ids are always lowercase
-  return m ? m : undefined;
-}
-
-export function createGeminiClient(env: Record<string, string | undefined> = process.env): AiClient {
+/** Only the API key comes from the environment; the model is the AI_MODEL constant in lib/config.ts. */
+export function createGeminiClient(env: Record<string, string | undefined> = process.env, model: string = AI_MODEL): AiClient {
   const apiKey = env.GEMINI_API_KEY?.trim();
-  const model = normalizeModel(env.GEMINI_MODEL);
   if (!apiKey) throw new AppError("API_KEY_MISSING");
-  if (!model) {
-    console.error("[decoded] GEMINI_MODEL is not set (or is empty) in this server's environment");
-    throw new AppError("MODEL_NOT_SET");
-  }
   const ai = new GoogleGenAI({ apiKey });
 
   return {
@@ -53,10 +31,10 @@ export function createGeminiClient(env: Record<string, string | undefined> = pro
         return res.text ?? "";
       } catch (err) {
         const status = err instanceof ApiError ? err.status : (err as { status?: number })?.status;
-        // A model name is configuration, not a secret: log it so a typo is obvious in the server logs.
-        if (status === 404) console.error(`[decoded] Gemini does not know a model called "${model}" (check GEMINI_MODEL)`);
+        // A model name is configuration, not a secret: log it so a retired or unavailable model is obvious.
+        if (status === 404) console.error(`[decoded] Gemini does not know a model called "${model}" (see AI_MODEL in lib/config.ts)`);
         const mapped = mapProviderError(err, signal);
-        // Tell the user which model name the server actually used; a name is configuration, not a secret.
+        // Tell the user which model the app used; a name is configuration, not a secret.
         if (mapped.code === "MODEL_UNAVAILABLE") mapped.detail = model;
         throw mapped;
       }

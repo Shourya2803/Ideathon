@@ -1,44 +1,39 @@
 import { describe, expect, it, vi } from "vitest";
-import { createGeminiClient, mapProviderError, normalizeModel } from "@/lib/ai/gemini";
-import { ERROR_INFO } from "@/lib/errors";
+import { createGeminiClient, mapProviderError } from "@/lib/ai/gemini";
+import { AI_MODEL } from "@/lib/config";
+import { AppError, ERROR_INFO, toErrorPayload } from "@/lib/errors";
 
-describe("GEMINI_MODEL handling", () => {
-  it("accepts the common ways a model name gets pasted into a dashboard", () => {
-    expect(normalizeModel("gemini-2.5-flash")).toBe("gemini-2.5-flash");
-    expect(normalizeModel("  gemini-2.5-flash \n")).toBe("gemini-2.5-flash");
-    expect(normalizeModel('"gemini-2.5-flash"')).toBe("gemini-2.5-flash");
-    expect(normalizeModel("'gemini-2.5-flash'")).toBe("gemini-2.5-flash");
-    expect(normalizeModel("models/gemini-2.5-flash")).toBe("gemini-2.5-flash");
-    expect(normalizeModel("GEMINI_MODEL=gemini-2.5-flash")).toBe("gemini-2.5-flash");
-    expect(normalizeModel("GEMINI_MODEL = \"gemini-2.5-flash\"")).toBe("gemini-2.5-flash");
-    expect(normalizeModel("Gemini 2.5 Flash")).toBe("gemini-2.5-flash");
+describe("the AI model is set in code, not in the environment", () => {
+  it("uses a valid, lowercase Gemini model id", () => {
+    expect(AI_MODEL).toMatch(/^gemini-[a-z0-9.-]+$/);
   });
-  it("treats empty or missing values as not set", () => {
-    expect(normalizeModel(undefined)).toBeUndefined();
-    expect(normalizeModel("")).toBeUndefined();
-    expect(normalizeModel('  ""  ')).toBeUndefined();
+  it("needs only an API key to create a client (no model variable)", () => {
+    expect(() => createGeminiClient({ GEMINI_API_KEY: "k" })).not.toThrow();
   });
-  it("says the model is NOT SET, distinct from an unknown model name", () => {
-    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    expect(() => createGeminiClient({ GEMINI_API_KEY: "k" })).toThrow(expect.objectContaining({ code: "MODEL_NOT_SET" }));
-    spy.mockRestore();
-    expect(mapProviderError(Object.assign(new Error("not found"), { status: 404 })).code).toBe("MODEL_UNAVAILABLE");
-    expect(ERROR_INFO.MODEL_NOT_SET.message).toMatch(/GEMINI_MODEL/);
-    expect(ERROR_INFO.MODEL_UNAVAILABLE.message).not.toBe(ERROR_INFO.MODEL_NOT_SET.message);
+  it("ignores any GEMINI_MODEL left in an environment, so a wrong value cannot break it", () => {
+    expect(() => createGeminiClient({ GEMINI_API_KEY: "k", GEMINI_MODEL: "totally wrong ~~" })).not.toThrow();
   });
-  it("tells the user which model name the server used when Gemini rejects it", async () => {
-    const { createGeminiClient: make } = await import("@/lib/ai/gemini");
-    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const client = make({ GEMINI_API_KEY: "k", GEMINI_MODEL: "Not A Model" });
-    // the SDK call itself is not mocked here; only the error mapping contract is checked
-    const { toErrorPayload, AppError } = await import("@/lib/errors");
-    const err = new AppError("MODEL_UNAVAILABLE", "not-a-model");
-    expect(toErrorPayload(err.code, err.detail)).toMatchObject({ code: "MODEL_UNAVAILABLE", detail: "not-a-model" });
-    expect(toErrorPayload("MODEL_NOT_SET")).not.toHaveProperty("detail");
-    expect(client).toBeTruthy();
-    spy.mockRestore();
-  });
-  it("checks the API key before the model", () => {
+  it("still requires the API key", () => {
     expect(() => createGeminiClient({})).toThrow(expect.objectContaining({ code: "API_KEY_MISSING" }));
+    expect(() => createGeminiClient({ GEMINI_API_KEY: "   " })).toThrow(expect.objectContaining({ code: "API_KEY_MISSING" }));
+  });
+});
+
+describe("when Gemini rejects the model", () => {
+  it("maps a 404 to MODEL_UNAVAILABLE and points at the code, not at an env var", () => {
+    expect(mapProviderError(Object.assign(new Error("not found"), { status: 404 })).code).toBe("MODEL_UNAVAILABLE");
+    expect(ERROR_INFO.MODEL_UNAVAILABLE.message).toMatch(/lib\/config\.ts/);
+    expect(ERROR_INFO.MODEL_UNAVAILABLE.message).not.toMatch(/GEMINI_MODEL/);
+  });
+  it("can carry the model name to the user as non-sensitive detail", () => {
+    const err = new AppError("MODEL_UNAVAILABLE", AI_MODEL);
+    expect(toErrorPayload(err.code, err.detail)).toMatchObject({ code: "MODEL_UNAVAILABLE", detail: AI_MODEL });
+    expect(toErrorPayload("RATE_LIMITED")).not.toHaveProperty("detail");
+  });
+  it("logs which model was rejected", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mapProviderError(Object.assign(new Error("not found"), { status: 404 }));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining("404"));
+    spy.mockRestore();
   });
 });
