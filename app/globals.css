@@ -290,6 +290,79 @@ h3 {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
+/* ---- Result chapters: content assembles when a card arrives in front ----------------------
+   Inactive cards hold their content hidden; when a card becomes the front one (data-active),
+   each top-level block rises and unfolds in a cascade and the title flips in word by word. */
+.chapter .stagger > * {
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+.chapter[data-active="true"] .stagger > * {
+  animation: chapter-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.chapter[data-active="true"] .stagger > :nth-child(1) { animation-delay: 0.05s; }
+.chapter[data-active="true"] .stagger > :nth-child(2) { animation-delay: 0.13s; }
+.chapter[data-active="true"] .stagger > :nth-child(3) { animation-delay: 0.21s; }
+.chapter[data-active="true"] .stagger > :nth-child(4) { animation-delay: 0.29s; }
+.chapter[data-active="true"] .stagger > :nth-child(5) { animation-delay: 0.37s; }
+.chapter[data-active="true"] .stagger > :nth-child(6) { animation-delay: 0.45s; }
+.chapter[data-active="true"] .stagger > :nth-child(7) { animation-delay: 0.53s; }
+.chapter[data-active="true"] .stagger > :nth-child(n + 8) { animation-delay: 0.6s; }
+@keyframes chapter-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px) rotateX(-22deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.word-flip {
+  display: inline;
+  perspective: 700px;
+}
+.word {
+  display: inline-block;
+}
+.chapter .word {
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+.chapter[data-active="true"] .word {
+  animation: word-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(0.12s + var(--w, 0) * 0.055s);
+}
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em) rotateX(-80deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A band of light that sweeps across the glass as a chapter arrives. */
+.card-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(155, 107, 255, 0.2) 48%, rgba(255, 77, 106, 0.16) 54%, transparent 64%);
+  transform: translateX(-130%);
+}
+.chapter[data-active="true"] .card-sweep {
+  animation: card-sweep 1.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes card-sweep {
+  to {
+    transform: translateX(130%);
+  }
+}
+
 /* Slim, quiet scrollbar for long result cards. */
 .scroll-thin {
   scrollbar-width: thin;

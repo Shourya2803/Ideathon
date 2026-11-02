@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowDown, CalendarDays, Check, CheckCircle2, HelpCircle, ListChecks, TriangleAlert } from "lucide-react";
-import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
-import { useRef, useState, type ReactNode } from "react";
+import { motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { scrollToY } from "@/components/LenisProvider";
 import CountUp from "@/components/reactbits/CountUp";
 import type { ShapeName } from "@/components/scene/store";
@@ -153,7 +153,7 @@ function buildChapters(result: AnalysisResponse, onReset: () => void): Chapter[]
             a.documentTitle.length > 60 ? "text-3xl sm:text-4xl" : a.documentTitle.length > 32 ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl"
           }`}
         >
-          {a.documentTitle}
+          <SplitWords text={a.documentTitle} />
         </h2>
         <p className="mt-5 text-lg leading-relaxed text-white/80 sm:text-xl">{a.summary}</p>
         {meta.source === "sample" ? (
@@ -549,31 +549,116 @@ function buildChapters(result: AnalysisResponse, onReset: () => void): Chapter[]
 const glassClass = "liquid-glass-strong bg-[#08080c] w-[min(92vw,46rem)] rounded-[2rem]";
 const cardClass = `${glassClass} p-6 sm:p-10`;
 
+/** Title that flips in word by word (see .chapter .word in globals.css). The full text stays readable to assistive tech. */
+function SplitWords({ text }: { text: string }) {
+  return (
+    <>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true" className="word-flip">
+        {text.split(" ").map((w, i) => (
+          <span key={i} className="word" style={{ "--w": i } as CSSProperties}>
+            {w}&nbsp;
+          </span>
+        ))}
+      </span>
+    </>
+  );
+}
+
+/** Glass slabs floating at different depths behind the cards; scrolling shifts and turns them (parallax). */
+const SHARDS = [
+  { x: 5, y: 12, w: 150, h: 210, z: -420, r: -22, f: -140, c: "from-[#2563eb]/20" },
+  { x: 80, y: 9, w: 190, h: 120, z: -650, r: 18, f: 180, c: "from-[#7c3fe6]/25" },
+  { x: 86, y: 60, w: 130, h: 190, z: -300, r: -12, f: 120, c: "from-[#ff304f]/15" },
+  { x: 3, y: 66, w: 200, h: 130, z: -760, r: 14, f: -200, c: "from-[#7c3fe6]/20" },
+  { x: 44, y: 3, w: 110, h: 150, z: -900, r: 6, f: 90, c: "from-[#2563eb]/20" },
+  { x: 62, y: 84, w: 160, h: 100, z: -540, r: -16, f: -110, c: "from-[#ff304f]/15" },
+  { x: 24, y: 82, w: 100, h: 140, z: -380, r: 20, f: 100, c: "from-[#7c3fe6]/20" },
+];
+
+function Shard({ s, i, pos, n }: { s: (typeof SHARDS)[number]; i: number; pos: MotionValue<number>; n: number }) {
+  const span = Math.max(1, n - 1);
+  const x = useTransform(pos, [0, span], [0, s.f]);
+  const rotateY = useTransform(pos, [0, span], [s.r, s.r + 70]);
+  return (
+    <motion.div
+      style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.w, height: s.h, z: s.z, x, rotateY, rotateX: 8 }}
+      animate={{ y: [0, -16, 0] }}
+      transition={{ duration: 5 + i * 0.8, repeat: Infinity, ease: "easeInOut", delay: i * 0.45 }}
+      className={`absolute rounded-3xl border border-white/[0.09] bg-gradient-to-br ${s.c} to-transparent shadow-[0_0_60px_-24px_rgba(124,63,230,0.6)] ${i > 3 ? "hidden sm:block" : ""}`}
+    />
+  );
+}
+
+function DepthShards({ pos, n }: { pos: MotionValue<number>; n: number }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 [perspective:1200px]">
+      {SHARDS.map((s, i) => (
+        <Shard key={i} s={s} i={i} pos={pos} n={n} />
+      ))}
+    </div>
+  );
+}
+
 function FlyCard({ i, pos, label, children }: { i: number; pos: MotionValue<number>; label: string; children: ReactNode }) {
   const d = useTransform(pos, (p) => i - p);
+  const side = i % 2 ? -1 : 1; // alternate which way cards swing
   const z = useTransform(d, (v) => (v >= 0 ? -v * 560 : -v * 900));
   const y = useTransform(d, (v) => (v >= 0 ? v * 30 : v * 140));
-  const rotateY = useTransform(d, (v) => v * (i % 2 ? -10 : 10));
+  // Upcoming cards peek in from one side; passed cards swing out past the camera on the other.
+  const x = useTransform(d, (v) => (v >= 0 ? -v * 70 * side : -v * 200 * side));
+  const rotateY = useTransform(d, (v) => v * side * 16);
   const rotateX = useTransform(d, (v) => (v < 0 ? -v * 18 : v * 4));
+  const rotateZ = useTransform(d, (v) => -v * side * 2.5);
   // Cards further back fade out instead of blurring (a blur filter kept text soft mid-scroll).
   const opacity = useTransform(d, (v) => (v >= 0 ? Math.max(0, 1 - v * 0.8) : Math.max(0, 1 + v * 2.4)));
   const pointerEvents = useTransform(d, (v) => (Math.abs(v) < 0.5 ? "auto" : "none"));
   const zIndex = useTransform(d, (v) => Math.round(100 - Math.abs(v) * 10));
+
+  // The card in front assembles its content (cascade + light sweep) each time it arrives.
+  const [on, setOn] = useState(i === 0);
+  useMotionValueEvent(d, "change", (v) => {
+    const front = Math.abs(v) < 0.5;
+    setOn((prev) => (prev === front ? prev : front));
+  });
+
+  // Cursor-driven 3D tilt of the card in front, smoothed by springs.
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const tiltY = useSpring(px, { stiffness: 140, damping: 17, mass: 0.6 });
+  const tiltX = useSpring(py, { stiffness: 140, damping: 17, mass: 0.6 });
+
   return (
     <motion.div style={{ zIndex, pointerEvents }} className="absolute inset-0 flex items-center justify-center px-3 [perspective:1400px]">
       {/* No will-change here: it makes Chrome keep text rasterised at an in-between scale (blurry at rest). */}
-      <motion.section aria-label={label} style={{ z, y, rotateY, rotateX, opacity }}>
-        {/* float in from the document when the results first arrive */}
+      <motion.section aria-label={label} style={{ z, y, x, rotateY, rotateX, rotateZ, opacity }}>
         <motion.div
-          initial={{ opacity: 0, scale: 0.6, y: 80, rotateX: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
-          transition={{ duration: 1.1, delay: 0.15 + i * 0.09, ease: [0.22, 1, 0.36, 1] }}
-          className={glassClass}
+          style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 1100 }}
+          onPointerMove={(e) => {
+            if (!on || e.pointerType !== "mouse") return;
+            const r = e.currentTarget.getBoundingClientRect();
+            px.set(((e.clientX - r.left) / r.width - 0.5) * 9);
+            py.set(-((e.clientY - r.top) / r.height - 0.5) * 7);
+          }}
+          onPointerLeave={() => {
+            px.set(0);
+            py.set(0);
+          }}
         >
-          {/* Long content scrolls inside, so the card's frame and glowing edge stay put. */}
-          <div className="scroll-thin max-h-[74svh] overflow-y-auto overscroll-contain p-6 sm:p-10" data-lenis-prevent>
-            {children}
-          </div>
+          {/* float in from the document when the results first arrive */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6, y: 80, rotateX: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 1.1, delay: 0.15 + i * 0.09, ease: [0.22, 1, 0.36, 1] }}
+            className={`${glassClass} chapter`}
+            data-active={on ? "true" : "false"}
+          >
+            <span aria-hidden="true" className="card-sweep" />
+            {/* Long content scrolls inside, so the card's frame and glowing edge stay put. */}
+            <div className="stagger scroll-thin max-h-[74svh] overflow-y-auto overscroll-contain p-6 sm:p-10" data-lenis-prevent>
+              {children}
+            </div>
+          </motion.div>
         </motion.div>
       </motion.section>
     </motion.div>
@@ -619,6 +704,7 @@ export function ResultsView({ result, onReset }: { result: AnalysisResponse; onR
   return (
     <article ref={ref} aria-labelledby="result-title" className="relative" style={{ height: `${n * 90 + 10}svh` }}>
       <div className="sticky top-0 h-svh overflow-hidden">
+        <DepthShards pos={pos} n={n} />
         {chapters.map((c, i) => (
           <FlyCard key={c.id} i={i} pos={pos} label={c.label}>
             {c.body}
