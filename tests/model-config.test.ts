@@ -54,3 +54,12 @@ describe("falling back when the key cannot use the configured model", () => {
     expect(choosePreferredModel([])).toBeUndefined();
   });
 });
+
+describe("when the main model is overloaded", () => {
+  it("prefers the lighter models, skipping everything already tried", () => {
+    const all = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-2.5-pro"];
+    const order = ["gemini-2.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest"];
+    expect(choosePreferredModel(all, ["gemini-2.5-flash"], order)).toBe("gemini-2.5-flash-lite");
+    expect(choosePreferredModel(all, ["gemini-2.5-flash", "gemini-2.5-flash-lite"], order)).toBe("gemini-flash-latest");
+  });
+});

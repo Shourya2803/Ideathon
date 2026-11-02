@@ -23,11 +23,20 @@ const FALLBACK_ORDER = [
 const NOT_FOR_TEXT = /tts|image|embed|live|audio|omni|robotics|veo|imagen|aqa/i;
 
 /** Picks a usable model from the ones a key can call: known-good first, otherwise any text flash model. */
-export function choosePreferredModel(available: string[], not?: string): string | undefined {
-  const usable = available.filter((m) => !NOT_FOR_TEXT.test(m) && m !== not);
-  for (const m of FALLBACK_ORDER) if (usable.includes(m)) return m;
+export function choosePreferredModel(
+  available: string[],
+  not?: string | Iterable<string>,
+  order: string[] = FALLBACK_ORDER,
+): string | undefined {
+  const skip = new Set(typeof not === "string" ? [not] : not ?? []);
+  const usable = available.filter((m) => !NOT_FOR_TEXT.test(m) && !skip.has(m));
+  for (const m of order) if (usable.includes(m)) return m;
   return usable.find((m) => /flash/.test(m)) ?? usable.find((m) => /^gemini-/.test(m));
 }
+
+/** When the main model is overloaded, lighter models usually still have capacity. */
+const BUSY_ORDER = ["gemini-2.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3-flash-preview", "gemini-2.5-flash"];
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Asks Gemini which models this API key can call for text generation. Never throws. */
 async function listCallableModels(apiKey: string): Promise<string[] | undefined> {
@@ -70,27 +79,44 @@ export function createGeminiClient(env: Record<string, string | undefined> = pro
   return {
     async generate({ system, content, signal }) {
       let current = workingModel ?? model;
-      let switched = false;
+      const tried = new Set<string>();
+      let listed = false;
       let seen: string[] | undefined;
-      for (;;) {
+      let busyHits = 0;
+      // At most 4 calls: the first, one quick retry on overload, then up to two other models.
+      for (let attempt = 0; ; attempt++) {
+        tried.add(current);
         try {
           const res = await call(current, system, content, signal);
           return res.text ?? "";
         } catch (err) {
           const status = statusOf(err);
-          if (status === 404) {
-            console.error(`[decoded] Gemini does not know a model called "${current}" for this API key`);
-            if (!switched) {
-              switched = true;
+          let next: string | undefined;
+          const lookUp = async () => {
+            if (!listed) {
+              listed = true;
               seen = await listCallableModels(apiKey);
-              const alt = seen ? choosePreferredModel(seen, current) : undefined;
-              if (alt) {
-                console.error(`[decoded] switching to "${alt}", which this key can use`);
-                workingModel = alt;
-                current = alt;
-                continue;
-              }
             }
+          };
+          if (status === 404 && attempt < 3) {
+            console.error(`[decoded] Gemini does not know a model called "${current}" for this API key`);
+            await lookUp();
+            next = seen ? choosePreferredModel(seen, tried) : undefined;
+            if (next) workingModel = next; // this key can't use the configured model; remember what works
+          } else if (status === 503 && attempt < 3 && !signal.aborted) {
+            busyHits++;
+            console.error(`[decoded] "${current}" is overloaded (503)`);
+            await sleep(1200);
+            if (busyHits === 1) next = current; // one quick retry on the same model
+            else {
+              await lookUp();
+              next = choosePreferredModel(seen ?? BUSY_ORDER, tried, BUSY_ORDER);
+            }
+          }
+          if (next) {
+            if (next !== current) console.error(`[decoded] trying "${next}" instead`);
+            current = next;
+            continue;
           }
           const mapped = mapProviderError(err, signal);
           // Model names are configuration, not secrets: show what was tried and what the key can use.
