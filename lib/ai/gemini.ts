@@ -18,7 +18,12 @@ export function normalizeModel(raw?: string): string | undefined {
     ?.trim()
     .replace(/^["']+|["']+$/g, "")
     .trim()
-    .replace(/^models\//i, "");
+    .replace(/^GEMINI_MODEL\s*[=:]\s*/i, "") // a whole "GEMINI_MODEL=..." line pasted into the value box
+    .replace(/^["']+|["']+$/g, "")
+    .trim()
+    .replace(/^models\//i, "")
+    .replace(/\s+/g, "-") // "gemini 2.5 flash"
+    .toLowerCase(); // model ids are always lowercase
   return m ? m : undefined;
 }
 
@@ -50,7 +55,10 @@ export function createGeminiClient(env: Record<string, string | undefined> = pro
         const status = err instanceof ApiError ? err.status : (err as { status?: number })?.status;
         // A model name is configuration, not a secret: log it so a typo is obvious in the server logs.
         if (status === 404) console.error(`[decoded] Gemini does not know a model called "${model}" (check GEMINI_MODEL)`);
-        throw mapProviderError(err, signal);
+        const mapped = mapProviderError(err, signal);
+        // Tell the user which model name the server actually used; a name is configuration, not a secret.
+        if (mapped.code === "MODEL_UNAVAILABLE") mapped.detail = model;
+        throw mapped;
       }
     },
   };

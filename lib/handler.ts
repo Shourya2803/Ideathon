@@ -63,9 +63,10 @@ export async function handleAnalyze(req: Request, deps: HandlerDeps = {}): Promi
         send({ type: "result", data });
       } catch (err) {
         const code: ErrorCode = err instanceof AppError ? err.code : "UNEXPECTED";
+        const detail = err instanceof AppError ? err.detail : undefined;
         // Log the code only: never document text, prompts or provider messages.
         console.error(`[decoded] analysis failed: ${code}`);
-        send({ type: "error", error: toErrorPayload(code) });
+        send({ type: "error", error: toErrorPayload(code, detail) });
       } finally {
         bytes = null; // release the buffer; nothing is persisted
         controller.close();

@@ -57,7 +57,14 @@ export const ERROR_INFO: Record<ErrorCode, ErrorInfo> = {
 };
 
 export class AppError extends Error {
-  constructor(public readonly code: ErrorCode) {
+  /**
+   * Optional non-sensitive context shown to the user (e.g. which model name the server is configured
+   * with). Never put document content, prompts, keys or provider messages here.
+   */
+  constructor(
+    public readonly code: ErrorCode,
+    public detail?: string,
+  ) {
     super(code); // message is the code on purpose: never carries content
     this.name = "AppError";
   }
@@ -66,9 +73,9 @@ export class AppError extends Error {
   }
 }
 
-export function toErrorPayload(code: ErrorCode) {
+export function toErrorPayload(code: ErrorCode, detail?: string): { code: ErrorCode; message: string; retryable: boolean; detail?: string } {
   const { message, retryable } = ERROR_INFO[code];
-  return { code, message, retryable };
+  return detail ? { code, message, retryable, detail } : { code, message, retryable };
 }
 
 export type ErrorPayload = ReturnType<typeof toErrorPayload>;
