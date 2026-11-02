@@ -37,3 +37,20 @@ describe("when Gemini rejects the model", () => {
     spy.mockRestore();
   });
 });
+
+import { choosePreferredModel } from "@/lib/ai/gemini";
+
+describe("falling back when the key cannot use the configured model", () => {
+  it("prefers known-good text models", () => {
+    expect(choosePreferredModel(["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"])).toBe("gemini-2.5-flash");
+    expect(choosePreferredModel(["gemini-2.5-flash-lite", "gemini-flash-latest"], "gemini-2.5-flash")).toBe("gemini-flash-latest");
+  });
+  it("never picks the one that just failed, nor speech/image/embedding models", () => {
+    expect(choosePreferredModel(["gemini-2.5-flash", "gemini-2.5-flash-lite"], "gemini-2.5-flash")).toBe("gemini-2.5-flash-lite");
+    expect(choosePreferredModel(["gemini-2.5-flash-preview-tts", "gemini-2.5-flash-image", "text-embedding-004"])).toBeUndefined();
+  });
+  it("falls back to any text flash model it doesn't know by name", () => {
+    expect(choosePreferredModel(["gemini-9-flash", "gemini-9-pro"])).toBe("gemini-9-flash");
+    expect(choosePreferredModel([])).toBeUndefined();
+  });
+});
